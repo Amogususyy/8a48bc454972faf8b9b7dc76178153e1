@@ -1,10 +1,25 @@
-FROM golang:1.18.2-alpine3.16
+# Base image
+FROM ubuntu:latest
 
-RUN apk add git \
- && git clone https://github.com/handsomefox/gowarp.git && cd gowarp/ \
- && git checkout ac6786e9fa3306dbcc68380f6b78ee045728c356 \
- && go install 
- 
-EXPOSE 7999
-WORKDIR /go/gowarp/
-CMD go run main.go
+ENV MONGO_HOST=localhost \
+    MONGO_PORT=27017 \
+    PORT=8080 \
+    DB_URI=mongodb://localhost:27017/any
+    DATABASE_NAME=gowarp \
+    COLLECTION_NAME=keys
+
+RUN apt-get update && \
+    apt-get install -y mongodb \
+    go \
+    make \
+    git
+
+WORKDIR /app
+
+RUN mkdir -p /data/db
+RUN git clone https://github.com/handsomefox/gowarp.git /app
+
+VOLUME ["/data/db"]
+
+CMD ["mongod --dbpath /data/db &"]
+CMD ["make run_serve"]
