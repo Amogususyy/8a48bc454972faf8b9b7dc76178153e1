@@ -4,7 +4,7 @@ FROM ubuntu:latest
 ENV MONGO_HOST=localhost \
     MONGO_PORT=27017 \
     PORT=8080 \
-    DB_URI=mongodb://localhost:27017/any
+    DB_URI=mongodb://localhost:27017/any \
     DATABASE_NAME=gowarp \
     COLLECTION_NAME=keys
 
