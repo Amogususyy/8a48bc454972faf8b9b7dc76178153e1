@@ -1,0 +1,39 @@
+FROM ubuntu:20.04
+
+ARG TZ=UTC
+
+ENV MONGO_HOST=localhost \
+    MONGO_PORT=27017 \
+    PORT=8080 \
+    DB_URI=mongodb://localhost:27017/any \
+    DATABASE_NAME=gowarp \
+    COLLECTION_NAME=keys \
+    GOPATH="${HOME}/go" \
+    PATH="/usr/local/go/bin:${PATH}" \
+    DEBIAN_FRONTEND=noninteractive
+
+RUN apt update && \
+    apt install -y curl wget
+
+RUN wget https://golang.org/dl/go1.21.3.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.3.linux-amd64.tar.gz && \
+    rm go1.21.3.linux-amd64.tar.gz
+
+RUN curl https://repo.mongodb.org/apt/ubuntu/dists/focal/mongodb-org/7.0/Release.gpg | tee /usr/share/keyrings/mongodb.gpg >/dev/null \
+    echo "deb [signed-by=/usr/share/keyrings/mongodb.gpg] http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+RUN apt-get update && \
+    apt-get install -y \
+    mongodb-server \
+    make \
+    git
+
+WORKDIR /app
+
+RUN mkdir -p /data/db
+RUN git clone https://github.com/handsomefox/gowarp.git /app
+COPY start.bash /app/start.bash
+
+VOLUME ["/data/db"]
+
+CMD ["bash", "start.bash"]
